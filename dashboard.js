@@ -72,16 +72,54 @@ const DataClient = {
         });
         return data.planner;
     },
-    async getWorkouts(username) {
-        const data = await this.request(`/workout?username=${encodeURIComponent(username)}`);
-        return data.workouts || [];
+    async listFamilies() {
+        const data = await this.request('/families');
+        return data.families || [];
     },
-    async saveWorkouts(username, workouts) {
-        const data = await this.request('/workout', {
-            method: 'PUT',
-            body: { username, workouts }
+    async createFamily(payload) {
+        const data = await this.request('/families', {
+            method: 'POST',
+            body: payload
         });
-        return data.workouts || [];
+        return data.family;
+    },
+    async updateFamily(family) {
+        const data = await this.request('/families', {
+            method: 'PUT',
+            body: { family }
+        });
+        return data.family;
+    },
+    async joinFamily(payload) {
+        const data = await this.request('/families', {
+            method: 'PATCH',
+            body: { action: 'join', ...payload }
+        });
+        return data;
+    },
+    async regenerateFamily(familyId) {
+        const data = await this.request('/families', {
+            method: 'PATCH',
+            body: { action: 'regenerate', familyId }
+        });
+        return data.family;
+    },
+    async updateFamilyMemberRole(payload) {
+        const data = await this.request('/families', {
+            method: 'PATCH',
+            body: { action: 'updateMemberRole', ...payload }
+        });
+        return data;
+    },
+    async listFamiliesForUser(username) {
+        const query = username ? `?username=${encodeURIComponent(username)}` : '';
+        const data = await this.request(`/families${query}`);
+        return data.families || [];
+    },
+    async getFamilyById(familyId) {
+        if (!familyId) return null;
+        const data = await this.request(`/families?familyId=${encodeURIComponent(familyId)}`);
+        return data.family || null;
     }
 };
 
@@ -1813,7 +1851,9 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        renderPlanningTips(dayEntriesData);
+        const familyRemindersForDay = getFamilyRemindersForDate(selectedDateISO);
+        renderFamilyReminders(selectedDateISO, familyRemindersForDay);
+        renderPlanningTips(dayEntriesData, familyRemindersForDay);
     }
 
     async function handlePracticeAssist(entry, container, triggerBtn) {
@@ -3226,16 +3266,34 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    const manageFamilyBtn = document.getElementById('manageFamilyBtn');
+    manageFamilyBtn?.addEventListener('click', () => {
+        activatePage('familyChat');
+        document.getElementById('familyChat')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (!currentFamily && !isAdmin) {
+            setFamilySetupFeedback('');
+            familySetupPanel?.classList.remove('hidden');
+            toggleFamilyForms('join');
+        } else if (currentFamily) {
+            setFamilySetupFeedback('');
+            familySetupPanel?.classList.add('hidden');
+        }
+    });
+
     await syncPlannerFromServer({ silent: true });
 
     if (!isAdmin) {
+        const FAMILY_SYNC_INTERVAL_MS = 6000;
         const PLANNER_SYNC_INTERVAL_MS = 6000;
+        setInterval(() => {
+            syncCurrentFamilyFromServer({ silent: true });
+        }, FAMILY_SYNC_INTERVAL_MS);
         setInterval(() => {
             syncPlannerFromServer({ silent: true });
         }, PLANNER_SYNC_INTERVAL_MS);
     }
 
-    function renderPlanningTips(dayEntriesData) {
+    function renderPlanningTips(dayEntriesData, familyRemindersForDay) {
         if (!planningTipsList) return;
         planningTipsList.innerHTML = '';
 
@@ -3248,8 +3306,37 @@ document.addEventListener('DOMContentLoaded', function() {
             return 2;
         };
 
-        if (dayEntriesData.length) {
-            const sorted = dayEntriesData
+        const combinedItems = dayEntriesData.map(item => ({
+            source: 'personal',
+            ...item
+        }));
+
+        if (familyRemindersForDay && familyRemindersForDay.length > 0) {
+            familyRemindersForDay
+                .filter(reminder => {
+                    const assigned = Array.isArray(reminder.assignedTo) ? reminder.assignedTo : [];
+                    return (
+                        isFamilyOwner ||
+                        isFamilyAdult ||
+                        assigned.length === 0 ||
+                        assigned.includes(currentUser)
+                    );
+                })
+                .forEach(reminder => {
+                    combinedItems.push({
+                        source: 'family',
+                        title: reminder.title,
+                        notes: reminder.notes,
+                        startDate: reminder.date,
+                        startTime: reminder.time || '',
+                        priority: reminder.priority,
+                        type: 'task'
+                    });
+                });
+        }
+
+        if (combinedItems.length) {
+            const sorted = combinedItems
                 .slice()
                 .sort((a, b) => {
                     const prio = priorityWeight(a) - priorityWeight(b);
@@ -3263,7 +3350,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const timeLabel = item.startTime
                     ? `${formatTimeDisplay(selectedDateISO, item.startTime)} ${timezoneLabel}`
                     : 'all day';
-                const labelPrefix = item.type === 'event' ? 'Event' : 'Task';
+                const labelPrefix =
+                    item.source === 'family' ? 'Shared reminder' : item.type === 'event' ? 'Event' : 'Task';
                 tips.push(
                     `${labelPrefix}: **${item.title}** — aim to handle it ${timeLabel} (Priority: ${priority}).`
                 );
@@ -3277,8 +3365,12 @@ document.addEventListener('DOMContentLoaded', function() {
             tips.push('Batch similar tasks together to stay in flow and reduce context switching.');
         }
 
+        if (familyRemindersForDay && familyRemindersForDay.length) {
+            tips.push('Check your shared reminders so everyone in the family stays aligned today.');
+        }
+
         if (!tips.length) {
-            tips.push('Add a task to see personalized planning tips for today.');
+            tips.push('Add a task or shared reminder to see personalized planning tips for today.');
         }
 
         tips.slice(0, 6).forEach(text => {
@@ -3967,183 +4059,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Workout Regime Maker
-    const workoutForm = document.getElementById('workoutForm');
-    const workoutRegimeOutput = document.getElementById('workoutRegimeOutput');
-    const savedWorkoutsList = document.getElementById('savedWorkoutsList');
-
-    let savedWorkouts = [];
-
-    async function loadWorkouts() {
-        try {
-            savedWorkouts = await DataClient.getWorkouts(currentUser);
-            renderSavedWorkouts();
-        } catch (error) {
-            Debug.error('Failed to load workouts', error);
-        }
+    // Family Chat Event Listeners
+    if (familyChatSendBtn) {
+        familyChatSendBtn.addEventListener('click', sendFamilyChatMessage);
     }
 
-    function renderSavedWorkouts() {
-        if (!savedWorkoutsList) return;
-        savedWorkoutsList.innerHTML = '';
-        
-        if (savedWorkouts.length === 0) {
-            savedWorkoutsList.innerHTML = '<p class="empty-state-text">No saved workout regimes yet.</p>';
-            return;
+    familyChatInput?.addEventListener('keydown', event => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendFamilyChatMessage();
         }
+    });
 
-        savedWorkouts.forEach((workout, index) => {
-            const card = document.createElement('div');
-            card.className = 'saved-workout-card';
-            card.innerHTML = `
-                <div class="saved-workout-header">
-                    <h4>${escapeHtml(workout.name || 'Unnamed Regime')}</h4>
-                    <button class="btn btn-secondary subtle btn-small delete-workout" data-index="${index}">Delete</button>
-                </div>
-                <p class="saved-workout-meta">${workout.daysPerWeek} days/week • ${workout.duration} min • ${workout.goal}</p>
-                <button class="btn btn-primary btn-small load-workout" data-index="${index}">Load Regime</button>
-            `;
-            savedWorkoutsList.appendChild(card);
-        });
+    regenerateCodeBtn?.addEventListener('click', regenerateFamilyCode);
+    createFamilyForm?.addEventListener('submit', handleCreateFamily);
+    joinFamilyForm?.addEventListener('submit', handleJoinFamily);
+    toggleFamilyForms('none');
 
-        document.querySelectorAll('.delete-workout').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                const index = parseInt(e.target.getAttribute('data-index'));
-                savedWorkouts.splice(index, 1);
-                await DataClient.saveWorkouts(currentUser, savedWorkouts);
-                renderSavedWorkouts();
-            });
-        });
-
-        document.querySelectorAll('.load-workout').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const index = parseInt(e.target.getAttribute('data-index'));
-                const workout = savedWorkouts[index];
-                if (workout && workoutRegimeOutput) {
-                    renderWorkoutRegime(workout.regime);
-                }
-            });
-        });
-    }
-
-    function renderWorkoutRegime(regime) {
-        if (!workoutRegimeOutput || !regime) return;
-        
-        let html = '<div class="workout-regime-content">';
-        
-        if (typeof regime === 'string') {
-            // If regime is a string (AI-generated text), display it formatted
-            html += formatAiText(regime);
-        } else if (typeof regime === 'object') {
-            // If regime is structured data
-            if (regime.weeks) {
-                regime.weeks.forEach((week, weekIndex) => {
-                    html += `<div class="workout-week"><h3>Week ${weekIndex + 1}</h3>`;
-                    if (week.days) {
-                        week.days.forEach((day, dayIndex) => {
-                            html += `<div class="workout-day"><h4>Day ${dayIndex + 1}</h4>`;
-                            if (day.exercises) {
-                                html += '<ul class="workout-exercises">';
-                                day.exercises.forEach(ex => {
-                                    html += `<li><strong>${escapeHtml(ex.name)}</strong>`;
-                                    if (ex.sets) html += ` - ${ex.sets} sets`;
-                                    if (ex.reps) html += ` x ${ex.reps} reps`;
-                                    if (ex.duration) html += ` - ${ex.duration}`;
-                                    if (ex.rest) html += ` (rest: ${ex.rest})`;
-                                    html += '</li>';
-                                });
-                                html += '</ul>';
-                            }
-                            html += '</div>';
-                        });
-                    }
-                    html += '</div>';
-                });
-            } else {
-                html += formatAiText(JSON.stringify(regime, null, 2));
-            }
-        }
-        
-        html += '</div>';
-        workoutRegimeOutput.innerHTML = html;
-    }
-
-    async function handleWorkoutFormSubmit(event) {
-        event.preventDefault();
-        
-        const workoutName = document.getElementById('workoutName')?.value.trim();
-        const workoutGoal = document.getElementById('workoutGoal')?.value;
-        const workoutDays = parseInt(document.getElementById('workoutDays')?.value || 3);
-        const workoutDuration = parseInt(document.getElementById('workoutDuration')?.value || 45);
-        const workoutLevel = document.getElementById('workoutLevel')?.value;
-        const workoutEquipment = document.getElementById('workoutEquipment')?.value.trim();
-        const workoutNotes = document.getElementById('workoutNotes')?.value.trim();
-
-        if (!workoutName) {
-            alert('Please enter a regime name');
-            return;
-        }
-
-        workoutRegimeOutput.innerHTML = '<p class="loading-text">Generating your personalized workout regime...</p>';
-
-        try {
-            const systemPrompt = `You are a professional fitness coach. Create a detailed, personalized workout regime based on the user's specifications. 
-Provide a comprehensive workout plan that includes:
-- Specific exercises with sets, reps, and rest periods
-- Weekly schedule breakdown
-- Progression recommendations
-- Safety tips and form cues
-- Equipment alternatives if needed
-
-Format your response in a clear, structured way that's easy to follow.`;
-
-            const userPrompt = `Create a ${workoutDays}-day per week workout regime for ${workoutDuration} minutes per session.
-
-Goal: ${workoutGoal}
-Fitness Level: ${workoutLevel}
-${workoutEquipment ? `Available Equipment: ${workoutEquipment}` : 'Equipment: Bodyweight exercises preferred'}
-${workoutNotes ? `Additional Notes: ${workoutNotes}` : ''}
-
-Please provide a detailed workout plan with specific exercises, sets, reps, rest periods, and weekly progression.`;
-
-            const regime = await callAI({
-                message: userPrompt,
-                system: systemPrompt,
-                temperature: 0.8
-            });
-
-            const workoutData = {
-                id: `workout_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
-                name: workoutName,
-                goal: workoutGoal,
-                daysPerWeek: workoutDays,
-                duration: workoutDuration,
-                level: workoutLevel,
-                equipment: workoutEquipment,
-                notes: workoutNotes,
-                regime: regime,
-                createdAt: new Date().toISOString()
-            };
-
-            renderWorkoutRegime(regime);
-
-            // Save to list
-            savedWorkouts.push(workoutData);
-            await DataClient.saveWorkouts(currentUser, savedWorkouts);
-            renderSavedWorkouts();
-
-        } catch (error) {
-            Debug.error('Failed to generate workout regime', error);
-            workoutRegimeOutput.innerHTML = '<p class="error-text">Failed to generate workout regime. Please try again.</p>';
-        }
-    }
-
-    if (workoutForm) {
-        workoutForm.addEventListener('submit', handleWorkoutFormSubmit);
-    }
-
-    // Load saved workouts on init
-    loadWorkouts();
+    renderFamilyOverview();
     };
     run().catch(error => {
         Debug.error('Dashboard initialization failed', error);

@@ -66,7 +66,7 @@ app.use(requestLogger);
 
 const usersHandler = require('./api/users');
 const plannerHandler = require('./api/planner');
-const workoutHandler = require('./api/workout');
+const familiesHandler = require('./api/families');
 
 function delegate(handler) {
     return (req, res) => {
@@ -81,7 +81,7 @@ function delegate(handler) {
 
 app.all('/api/users', delegate(usersHandler));
 app.all('/api/planner', delegate(plannerHandler));
-app.all('/api/workout', delegate(workoutHandler));
+app.all('/api/families', delegate(familiesHandler));
 
 // Send verification email
 app.post('/api/send-verification', async (req, res) => {
