@@ -11,7 +11,6 @@
         <header class="dashboard-header">
             <h1>FamilyHub</h1>
             <div class="header-controls">
-                <button id="manageFamilyBtn" class="btn btn-secondary subtle compact">Family Options</button>
                 <button id="aiCustomizeBtn" class="btn btn-tertiary compact">AI Customize</button>
                 <div class="user-info">
                     <span id="currentUser"></span>
@@ -23,7 +22,7 @@
         <nav class="dashboard-nav">
             <button class="nav-btn" data-page="aiTools">AI Productivity</button>
             <button class="nav-btn active" data-page="planner">Day Planner</button>
-            <button class="nav-btn" data-page="familyChat">Family Chat</button>
+            <button class="nav-btn" data-page="workout">Workout Regime</button>
             <button class="nav-btn" data-page="chatbot">Study Chatbot</button>
             <button class="nav-btn" data-page="finance">Financial Coach</button>
             <button class="nav-btn" data-page="budget">Budget Planner</button>
@@ -143,13 +142,6 @@
                             </div>
                             <div id="aiDayInsightsContent" class="ai-insights-body"></div>
                         </div>
-                        <div id="familyRemindersContainer" class="family-reminders hidden">
-                            <div class="family-reminders-header">
-                                <h3>Family Reminders</h3>
-                                <p class="family-reminders-subtitle">Shared by your family. Assigned items show up here automatically.</p>
-                            </div>
-                            <div id="familyRemindersList" class="family-reminders-list"></div>
-                        </div>
                     </div>
 
                     <aside class="planner-help glass">
@@ -159,67 +151,65 @@
                 </div>
             </section>
 
-            <!-- Family Chat Section -->
-            <section id="familyChat" class="page-section">
-                <div class="family-layout">
-                    <aside class="family-sidebar glass">
-                        <div class="family-header">
-                            <h2 id="familyNameHeading">Family Hub</h2>
-                            <p id="familyRoleLabel" class="family-role"></p>
-                        </div>
-                        <div id="familySetupPanel" class="family-setup hidden">
-                            <p>Create or join a family to share reminders and chat together.</p>
-                            <div class="family-setup-actions">
-                                <button type="button" id="showCreateFamily" class="btn btn-primary btn-small">Create Family</button>
-                                <button type="button" id="showJoinFamily" class="btn btn-secondary subtle btn-small">Join Family</button>
+            <!-- Workout Regime Section -->
+            <section id="workout" class="page-section">
+                <div class="workout-layout">
+                    <div class="glass workout-creator">
+                        <h2>Create Workout Regime</h2>
+                        <form id="workoutForm" class="workout-form">
+                            <div class="form-group">
+                                <label for="workoutName">Regime Name</label>
+                                <input type="text" id="workoutName" placeholder="Ex: Morning Strength Training" required>
                             </div>
-                            <form id="createFamilyForm" class="family-form hidden">
-                                <div class="form-group">
-                                    <label for="createFamilyName">Family name</label>
-                                    <input type="text" id="createFamilyName" placeholder="Ex: The Wilson Crew" required>
-                                </div>
-                                <button type="submit" class="btn btn-primary btn-block">Create &amp; generate code</button>
-                            </form>
-                            <form id="joinFamilyForm" class="family-form hidden">
-                                <div class="form-group">
-                                    <label for="joinFamilyCode">Family code</label>
-                                    <input type="text" id="joinFamilyCode" placeholder="6-character code" maxlength="6" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="joinFamilyRole">Join as</label>
-                                    <select id="joinFamilyRole">
-                                        <option value="adult">Adult</option>
-                                        <option value="kid">Kid</option>
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn btn-secondary btn-block">Join Family</button>
-                            </form>
-                            <p id="familySetupFeedback" class="form-hint"></p>
-                        </div>
-                        <div id="familyCodeBlock" class="family-code-block">
-                            <p>Invite code</p>
-                            <div class="code-row">
-                                <span id="familyInviteCode">------</span>
-                                <button type="button" id="regenerateCodeBtn" class="btn btn-secondary subtle btn-small">Regenerate</button>
+                            <div class="form-group">
+                                <label for="workoutGoal">Goal</label>
+                                <select id="workoutGoal">
+                                    <option value="strength">Build Strength</option>
+                                    <option value="cardio">Cardiovascular Fitness</option>
+                                    <option value="weightloss">Weight Loss</option>
+                                    <option value="endurance">Endurance</option>
+                                    <option value="flexibility">Flexibility</option>
+                                    <option value="muscle">Muscle Building</option>
+                                    <option value="general">General Fitness</option>
+                                </select>
                             </div>
-                            <p class="form-hint">Share this with trusted family members so they can join.</p>
-                        </div>
-                        <div class="family-members">
-                            <h3>Family Members</h3>
-                            <ul id="familyMemberList"></ul>
-                        </div>
-                    </aside>
-                    <div class="family-chat glass">
-                        <div class="family-chat-header">
-                            <h2>Family Chat</h2>
-                            <p class="family-chat-subtitle">Coordinate plans, share wins, and stay connected.</p>
-                        </div>
-                        <div id="familyChatMessages" class="family-chat-messages"></div>
-                        <div class="chat-input-container">
-                            <input type="text" id="familyChatInput" placeholder="Send a message to your family..." class="chat-input">
-                            <button id="familyChatSend" class="btn btn-primary">Send</button>
+                            <div class="form-group">
+                                <label for="workoutDays">Days per Week</label>
+                                <input type="number" id="workoutDays" min="1" max="7" value="3" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="workoutDuration">Session Duration (minutes)</label>
+                                <input type="number" id="workoutDuration" min="15" max="180" value="45" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="workoutLevel">Fitness Level</label>
+                                <select id="workoutLevel">
+                                    <option value="beginner">Beginner</option>
+                                    <option value="intermediate">Intermediate</option>
+                                    <option value="advanced">Advanced</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="workoutEquipment">Available Equipment</label>
+                                <textarea id="workoutEquipment" rows="3" placeholder="Ex: Dumbbells, Resistance bands, Yoga mat, Pull-up bar..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="workoutNotes">Additional Notes</label>
+                                <textarea id="workoutNotes" rows="2" placeholder="Any injuries, preferences, or specific focus areas..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Generate Workout Regime</button>
+                        </form>
+                    </div>
+                    <div class="glass workout-result">
+                        <h2>Your Workout Regime</h2>
+                        <div id="workoutRegimeOutput" class="workout-output">
+                            <p class="empty-state-text">Fill out the form to generate your personalized workout regime.</p>
                         </div>
                     </div>
+                </div>
+                <div class="glass workout-saved">
+                    <h3>Saved Regimes</h3>
+                    <div id="savedWorkoutsList" class="saved-workouts-list"></div>
                 </div>
             </section>
 
@@ -444,20 +434,6 @@
                 <div class="ai-assist-block">
                     <button type="button" id="aiEntryAssistBtn" class="btn btn-secondary subtle full">AI Suggest Details</button>
                     <div id="aiEntrySuggestion" class="ai-assist-output" aria-live="polite"></div>
-                </div>
-                <div id="familyShareBlock" class="form-stack hidden">
-                    <div class="form-group toggle-row">
-                        <label for="shareWithFamily">Share with family</label>
-                        <label class="switch">
-                            <input type="checkbox" id="shareWithFamily">
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                    <div class="form-group hidden" id="familyAssigneeGroup">
-                        <label for="familyAssignees">Assign to family members</label>
-                        <select id="familyAssignees" multiple></select>
-                        <p class="form-hint">Choose who should receive this reminder. Leave empty to share with everyone.</p>
-                    </div>
                 </div>
                 <button type="submit" class="btn btn-primary">Save Entry</button>
             </form>

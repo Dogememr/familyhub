@@ -6,7 +6,8 @@ const STORE_FILE = path.join(process.cwd(), 'data', 'store.json');
 const DEFAULT_STORE = {
     users: [],
     planner: {},
-    families: []
+    families: [],
+    workouts: {}
 };
 
 function clone(value) {
@@ -37,7 +38,8 @@ function readFromFile() {
         return {
             users: Array.isArray(parsed.users) ? parsed.users : [],
             planner: parsed.planner && typeof parsed.planner === 'object' ? parsed.planner : {},
-            families: Array.isArray(parsed.families) ? parsed.families : []
+            families: Array.isArray(parsed.families) ? parsed.families : [],
+            workouts: parsed.workouts && typeof parsed.workouts === 'object' ? parsed.workouts : {}
         };
     } catch (error) {
         console.warn('[DataStore] Failed to read store file, using defaults:', error.message);
@@ -69,7 +71,8 @@ function updateStore(mutator) {
     memoryStore = {
         users: Array.isArray(next.users) ? next.users : [],
         planner: next.planner && typeof next.planner === 'object' ? next.planner : {},
-        families: Array.isArray(next.families) ? next.families : []
+        families: Array.isArray(next.families) ? next.families : [],
+        workouts: next.workouts && typeof next.workouts === 'object' ? next.workouts : {}
     };
     globalScope.__FAMILYHUB_DATA__ = memoryStore;
     persist();
@@ -225,6 +228,23 @@ function regenerateFamilyCode(familyId) {
     return clone(updatedFamily);
 }
 
+function getWorkout(username) {
+    const workouts = memoryStore.workouts[username];
+    if (workouts && Array.isArray(workouts)) {
+        return clone(workouts);
+    }
+    return [];
+}
+
+function setWorkout(username, workoutsData) {
+    const safeWorkouts = Array.isArray(workoutsData) ? workoutsData : [];
+    updateStore(store => {
+        const workouts = { ...store.workouts, [username]: clone(safeWorkouts) };
+        return { ...store, workouts };
+    });
+    return getWorkout(username);
+}
+
 module.exports = {
     getUsers,
     findUserByUsername,
@@ -239,6 +259,8 @@ module.exports = {
     createFamily,
     saveFamily,
     joinFamilyByCode,
-    regenerateFamilyCode
+    regenerateFamilyCode,
+    getWorkout,
+    setWorkout
 };
 
