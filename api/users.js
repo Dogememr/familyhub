@@ -86,10 +86,7 @@ module.exports = async (req, res) => {
                 return;
             }
 
-            if (findUserByEmail(email)) {
-                res.status(409).json({ error: 'Email already registered' });
-                return;
-            }
+            // Allow multiple accounts with the same email
 
             const newUser = addUser({
                 id: `user_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,

@@ -201,8 +201,9 @@ function getBackendMembership(username) {
 
 function joinFamilyLocally(code, role) {
     if (!code) return null;
+    const normalizedCode = String(code).trim().toUpperCase();
     const families = loadFamilies();
-    const index = families.findIndex(family => family.code === code);
+    const index = families.findIndex(family => family.code && String(family.code).trim().toUpperCase() === normalizedCode);
     if (index === -1) return null;
 
     const family = { ...families[index] };
@@ -1188,7 +1189,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (storedFamilyId) {
             currentFamily = familiesState.find(f => f.id === storedFamilyId) || null;
             if (!currentFamily) {
-                currentFamily = familiesState.find(family => family.code === storedFamilyId) || null;
+                const normalizedCode = String(storedFamilyId).trim().toUpperCase();
+                currentFamily = familiesState.find(family => family.code && String(family.code).trim().toUpperCase() === normalizedCode) || null;
             }
 
             if (currentFamily) {

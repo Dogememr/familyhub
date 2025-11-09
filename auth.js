@@ -284,12 +284,7 @@ function setupAuth() {
                 return;
             }
 
-            const existingEmail = await lookupUserByEmail(email);
-            if (existingEmail) {
-                Debug.warn('Signup failed: email already registered remotely', email);
-                showError('An account with that email already exists');
-                return;
-            }
+            // Allow multiple accounts with the same email - removed email uniqueness check
         } catch (error) {
             Debug.error('Failed to verify user uniqueness', error);
             showError('Could not verify username and email availability. Please try again.');

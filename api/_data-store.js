@@ -137,7 +137,9 @@ function findFamilyById(familyId) {
 }
 
 function findFamilyByCode(code) {
-    return clone(memoryStore.families.find(family => family.code === code) || null);
+    if (!code) return null;
+    const normalizedCode = String(code).trim().toUpperCase();
+    return clone(memoryStore.families.find(family => family.code && String(family.code).trim().toUpperCase() === normalizedCode) || null);
 }
 
 function generateFamilyCode(existing = new Set()) {
@@ -186,7 +188,11 @@ function saveFamily(family) {
 }
 
 function joinFamilyByCode({ username, role, code }) {
-    const family = memoryStore.families.find(item => item.code === code);
+    if (!code) {
+        return { family: null, user: null };
+    }
+    const normalizedCode = String(code).trim().toUpperCase();
+    const family = memoryStore.families.find(item => item.code && String(item.code).trim().toUpperCase() === normalizedCode);
     if (!family) {
         return { family: null, user: null };
     }
