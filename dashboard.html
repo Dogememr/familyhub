@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FamilyHub - Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-default">
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <h1>FamilyHub</h1>
+            <div class="header-controls">
+                <button id="manageFamilyBtn" class="btn btn-secondary subtle compact">Family Options</button>
+                <button id="aiCustomizeBtn" class="btn btn-tertiary compact">AI Customize</button>
+                <div class="user-info">
+                    <span id="currentUser"></span>
+                    <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <nav class="dashboard-nav">
+            <button class="nav-btn" data-page="aiTools">AI Productivity</button>
+            <button class="nav-btn active" data-page="planner">Day Planner</button>
+            <button class="nav-btn" data-page="familyChat">Family Chat</button>
+            <button class="nav-btn" data-page="chatbot">Study Chatbot</button>
+            <button class="nav-btn" data-page="finance">Financial Coach</button>
+            <button class="nav-btn" data-page="budget">Budget Planner</button>
+            <button class="nav-btn" data-page="mealPlanner">Meal Helper</button>
+            <button class="nav-btn" data-page="surprise">Momentum Boost</button>
+            <button class="nav-btn" data-page="nutrition">Nutrition Lookup</button>
+        </nav>
+
+        <main class="dashboard-content">
+            <!-- AI Productivity Section -->
+            <section id="aiTools" class="page-section">
+                <h2>AI Productivity Studio</h2>
+                <div class="ai-tools-grid">
+                    <div class="ai-tool-card glass">
+                        <div class="ai-tool-header">
+                            <h3>Focus Planner</h3>
+                            <p>Generate a prioritized plan for today based on your current schedule.</p>
+                        </div>
+                        <button type="button" id="aiFocusBtn" class="btn btn-primary btn-block">Generate Focus Plan</button>
+                        <div id="aiFocusResult" class="ai-tool-output"></div>
+                    </div>
+                    <div class="ai-tool-card glass">
+                        <div class="ai-tool-header">
+                            <h3>Habit Coach</h3>
+                            <p>Need help sticking with a habit? Tell AI what you’re working on.</p>
+                        </div>
+                        <div class="ai-tool-form">
+                            <input type="text" id="aiHabitInput" placeholder="Ex: Study math 30 minutes daily">
+                            <button type="button" id="aiHabitBtn" class="btn btn-secondary subtle">Get Coaching Tips</button>
+                        </div>
+                        <div id="aiHabitResult" class="ai-tool-output"></div>
+                    </div>
+                    <div class="ai-tool-card glass">
+                        <div class="ai-tool-header">
+                            <h3>Smart Break Ideas</h3>
+                            <p>Tell AI how you feel and get a productive micro-break suggestion.</p>
+                        </div>
+                        <div class="ai-tool-form">
+                            <input type="text" id="aiBreakInput" placeholder="Ex: Feeling tired after coding">
+                            <button type="button" id="aiBreakBtn" class="btn btn-tertiary subtle">Suggest a Break</button>
+                        </div>
+                        <div id="aiBreakResult" class="ai-tool-output"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Day Planner Section -->
+            <section id="planner" class="page-section active">
+                <div class="planner-header">
+                    <div class="calendar-controls">
+                        <button type="button" id="prevMonth" class="icon-btn" aria-label="Previous month">
+                            <span class="icon-chevron">&lsaquo;</span>
+                        </button>
+                        <div class="calendar-current">
+                            <span id="calendarMonth" class="calendar-month">Month</span>
+                            <span id="calendarYear" class="calendar-year">Year</span>
+                        </div>
+                        <button type="button" id="nextMonth" class="icon-btn" aria-label="Next month">
+                            <span class="icon-chevron">&rsaquo;</span>
+                        </button>
+                    </div>
+                    <div class="planner-header-actions">
+                        <button type="button" id="todayBtn" class="btn btn-secondary subtle">Today</button>
+                            <button type="button" id="aiPlanDayBtn" class="btn btn-tertiary subtle">AI Plan My Day</button>
+                        <button type="button" id="addEntryBtn" class="btn btn-primary">New Event / Task</button>
+                    </div>
+                        <div class="planner-share-controls">
+                            <input type="text" id="reminderCodeInput" placeholder="Paste reminder code..." autocomplete="off" />
+                            <button type="button" id="importReminderCodeBtn" class="btn btn-secondary subtle">Import Reminder</button>
+                        </div>
+                </div>
+
+                <div class="planner-layout">
+                    <div class="calendar-card glass">
+                        <div class="calendar-weekdays">
+                            <span>Sun</span>
+                            <span>Mon</span>
+                            <span>Tue</span>
+                            <span>Wed</span>
+                            <span>Thu</span>
+                            <span>Fri</span>
+                            <span>Sat</span>
+                        </div>
+                        <div id="calendarGrid" class="calendar-grid"></div>
+                    </div>
+
+                    <div class="day-detail glass">
+                        <div class="day-detail-header">
+                            <div>
+                                <h2 id="selectedDayLabel">Today</h2>
+                                <p id="selectedDayDate" class="detail-date"></p>
+                            </div>
+                            <div class="day-stats">
+                                <div class="stat">
+                                    <span class="stat-value" id="statsTasks">0</span>
+                                    <span class="stat-label">Tasks</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value" id="statsEvents">0</span>
+                                    <span class="stat-label">Events</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="dayEntries" class="day-entry-list empty">
+                            <div class="empty-state">
+                                <h3>No plans yet</h3>
+                                <p>Pick a time and add a task or event to keep your day on track.</p>
+                                <button type="button" class="btn btn-primary btn-small" id="emptyStateAdd">
+                                    Plan something
+                                </button>
+                            </div>
+                        </div>
+                        <div id="aiDayInsights" class="ai-insights hidden">
+                            <div class="ai-insights-header">
+                                <h3>AI Suggestions</h3>
+                                <button type="button" id="clearAiInsights" class="icon-btn ghost" aria-label="Close suggestions">&times;</button>
+                            </div>
+                            <div id="aiDayInsightsContent" class="ai-insights-body"></div>
+                        </div>
+                        <div id="familyRemindersContainer" class="family-reminders hidden">
+                            <div class="family-reminders-header">
+                                <h3>Family Reminders</h3>
+                                <p class="family-reminders-subtitle">Shared by your family. Assigned items show up here automatically.</p>
+                            </div>
+                            <div id="familyRemindersList" class="family-reminders-list"></div>
+                        </div>
+                    </div>
+
+                    <aside class="planner-help glass">
+                        <h3>Planning Tips</h3>
+                        <ul id="planningTipsList" class="planning-tips"></ul>
+                    </aside>
+                </div>
+            </section>
+
+            <!-- Family Chat Section -->
+            <section id="familyChat" class="page-section">
+                <div class="family-layout">
+                    <aside class="family-sidebar glass">
+                        <div class="family-header">
+                            <h2 id="familyNameHeading">Family Hub</h2>
+                            <p id="familyRoleLabel" class="family-role"></p>
+                        </div>
+                        <div id="familySetupPanel" class="family-setup hidden">
+                            <p>Create or join a family to share reminders and chat together.</p>
+                            <div class="family-setup-actions">
+                                <button type="button" id="showCreateFamily" class="btn btn-primary btn-small">Create Family</button>
+                                <button type="button" id="showJoinFamily" class="btn btn-secondary subtle btn-small">Join Family</button>
+                            </div>
+                            <form id="createFamilyForm" class="family-form hidden">
+                                <div class="form-group">
+                                    <label for="createFamilyName">Family name</label>
+                                    <input type="text" id="createFamilyName" placeholder="Ex: The Wilson Crew" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">Create &amp; generate code</button>
+                            </form>
+                            <form id="joinFamilyForm" class="family-form hidden">
+                                <div class="form-group">
+                                    <label for="joinFamilyCode">Family code</label>
+                                    <input type="text" id="joinFamilyCode" placeholder="6-character code" maxlength="6" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="joinFamilyRole">Join as</label>
+                                    <select id="joinFamilyRole">
+                                        <option value="adult">Adult</option>
+                                        <option value="kid">Kid</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-secondary btn-block">Join Family</button>
+                            </form>
+                            <p id="familySetupFeedback" class="form-hint"></p>
+                        </div>
+                        <div id="familyCodeBlock" class="family-code-block">
+                            <p>Invite code</p>
+                            <div class="code-row">
+                                <span id="familyInviteCode">------</span>
+                                <button type="button" id="regenerateCodeBtn" class="btn btn-secondary subtle btn-small">Regenerate</button>
+                            </div>
+                            <p class="form-hint">Share this with trusted family members so they can join.</p>
+                        </div>
+                        <div class="family-members">
+                            <h3>Family Members</h3>
+                            <ul id="familyMemberList"></ul>
+                        </div>
+                    </aside>
+                    <div class="family-chat glass">
+                        <div class="family-chat-header">
+                            <h2>Family Chat</h2>
+                            <p class="family-chat-subtitle">Coordinate plans, share wins, and stay connected.</p>
+                        </div>
+                        <div id="familyChatMessages" class="family-chat-messages"></div>
+                        <div class="chat-input-container">
+                            <input type="text" id="familyChatInput" placeholder="Send a message to your family..." class="chat-input">
+                            <button id="familyChatSend" class="btn btn-primary">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chatbot Section -->
+            <section id="chatbot" class="page-section">
+                <h2>Study Chatbot</h2>
+                <div class="chatbot-controls">
+                    <label for="botTextColor">Bot text
+                        <input type="color" id="botTextColor" value="#1e293b">
+                    </label>
+                    <label for="userTextColor">User text
+                        <input type="color" id="userTextColor" value="#ffffff">
+                    </label>
+                    <button type="button" id="resetChatColors" class="btn btn-secondary subtle">Reset</button>
+                </div>
+                <div class="chatbot-container">
+                    <div id="chatMessages" class="chat-messages"></div>
+                    <div class="chat-input-container">
+                        <input type="text" id="chatInput" placeholder="Ask me anything about homework or studying..." class="chat-input">
+                        <button id="sendChatBtn" class="btn btn-primary">Send</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Finance Section -->
+            <section id="finance" class="page-section">
+                <h2>Financial Coach</h2>
+                <div class="finance-grid">
+                    <div class="finance-card glass">
+                        <h3>Work Hours Calculator</h3>
+                        <form id="workHoursForm" class="stack-form">
+                            <div class="form-group">
+                                <label for="itemCost">Item cost</label>
+                                <input type="number" id="itemCost" placeholder="Ex: 249.99" min="0" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="hourlyRate">Hourly pay</label>
+                                <input type="number" id="hourlyRate" placeholder="Ex: 15.50" min="0" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="savingsRate">Savings rate (%)</label>
+                                <input type="number" id="savingsRate" placeholder="Optional" min="0" max="100" step="1">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Calculate</button>
+                        </form>
+                        <div id="workHoursResult" class="finance-output"></div>
+                    </div>
+                    <div class="finance-card glass">
+                        <h3>AI Purchasing Advice</h3>
+                        <form id="financeAiForm" class="stack-form">
+                            <div class="form-group">
+                                <label for="financeAiPrompt">What are you planning to buy?</label>
+                                <textarea id="financeAiPrompt" rows="3" placeholder="Describe the item and why you want it..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-tertiary">Ask AI</button>
+                        </form>
+                        <div id="financeAiResult" class="finance-output"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Budget Section -->
+            <section id="budget" class="page-section">
+                <h2>Budget Planner</h2>
+                <div class="budget-layout">
+                    <form id="budgetForm" class="glass budget-form">
+                        <div class="form-group">
+                            <label for="monthlyIncome">Monthly take-home income</label>
+                            <input type="number" id="monthlyIncome" placeholder="Ex: 3500" min="0" step="0.01" required>
+                        </div>
+                        <div id="budgetCategories" class="budget-table">
+                            <div class="budget-row header">
+                                <span>Category</span>
+                                <span>Amount</span>
+                                <span></span>
+                            </div>
+                        </div>
+                        <div class="budget-actions">
+                            <button type="button" id="addBudgetRow" class="btn btn-secondary subtle">Add category</button>
+                            <button type="submit" class="btn btn-primary">Summarize Budget</button>
+                        </div>
+                    </form>
+                    <div class="glass budget-summary">
+                        <div id="budgetSummary" class="budget-output"></div>
+                        <div id="budgetAiResult" class="budget-output"></div>
+                    </div>
+                    <div class="glass budget-forecast">
+                        <h3>Forecast &amp; Health Check</h3>
+                        <div id="budgetForecast" class="budget-output"></div>
+                        <div id="budgetHealth" class="budget-output"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Meal Planner Section -->
+            <section id="mealPlanner" class="page-section">
+                <h2>Meal Helper</h2>
+                <div class="meal-layout">
+                    <div class="glass meal-selector">
+                        <form id="mealPlanForm" class="meal-form">
+                            <div class="form-group">
+                                <label>Meal type</label>
+                                <div class="meal-type-grid" role="radiogroup">
+                                    <label class="meal-chip">
+                                        <input type="radio" name="mealType" value="breakfast" checked>
+                                        <span>Breakfast</span>
+                                    </label>
+                                    <label class="meal-chip">
+                                        <input type="radio" name="mealType" value="lunch">
+                                        <span>Lunch</span>
+                                    </label>
+                                    <label class="meal-chip">
+                                        <input type="radio" name="mealType" value="dinner">
+                                        <span>Dinner</span>
+                                    </label>
+                                    <label class="meal-chip">
+                                        <input type="radio" name="mealType" value="snack">
+                                        <span>Snack</span>
+                                    </label>
+                                    <label class="meal-chip">
+                                        <input type="radio" name="mealType" value="dessert">
+                                        <span>Dessert</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="mealPreferences">What do you have or crave?</label>
+                                <textarea id="mealPreferences" rows="3" placeholder="Available ingredients, diet notes, time available…"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="mealExtras">Anything else?</label>
+                                <textarea id="mealExtras" rows="2" placeholder="Extra comments for the chef AI (optional)"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Suggest Recipe</button>
+                        </form>
+                    </div>
+                    <div class="glass meal-result">
+                        <div id="mealSuggestion" class="meal-output"></div>
+                        <div id="mealSteps" class="meal-output"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Surprise Section -->
+            <section id="surprise" class="page-section">
+                <h2>Momentum Boost</h2>
+                <div class="surprise-layout glass">
+                    <p class="surprise-description">Need a nudge? Let’s grab a quick action to energize your day.</p>
+                    <div class="surprise-controls">
+                        <select id="surpriseFocus">
+                            <option value="productivity">Productivity boost</option>
+                            <option value="family">Family connection</option>
+                            <option value="wellness">Wellness recharge</option>
+                            <option value="learning">Learning spark</option>
+                        </select>
+                        <button id="surpriseBtn" class="btn btn-primary">Generate Boost</button>
+                    </div>
+                    <div id="surpriseResult" class="surprise-output"></div>
+                </div>
+            </section>
+
+            <!-- Nutrition Section -->
+            <section id="nutrition" class="page-section">
+                <h2>Nutrition Lookup</h2>
+                <div class="nutrition-search">
+                    <input type="text" id="foodSearch" placeholder="Search for a food item..." class="search-input">
+                    <button id="searchFoodBtn" class="btn btn-primary">Search</button>
+                </div>
+                <div id="nutritionResults" class="nutrition-results"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Planner Entry Modal -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3 id="modalTitle">Add Entry</h3>
+            <form id="taskForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="entryType">Type</label>
+                        <div class="segmented-control" role="group" aria-label="Entry type">
+                            <button type="button" data-type="task" class="segment active">Task</button>
+                            <button type="button" data-type="event" class="segment">Event</button>
+                            <input type="hidden" id="entryType" value="task">
+                        </div>
+                    </div>
+                <div class="form-group">
+                    <label for="taskTitle">Title</label>
+                    <input type="text" id="taskTitle" placeholder="What are you planning?" required>
+                </div>
+                <div class="form-group">
+                    <label for="taskDescription">Notes</label>
+                    <textarea id="taskDescription" rows="3" placeholder="Add optional details..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="taskPriority">Priority</label>
+                    <select id="taskPriority">
+                        <option value="normal">Normal</option>
+                        <option value="high">High</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="taskDate">Start Date</label>
+                    <input type="date" id="taskDate" required>
+                </div>
+                <div class="form-group" id="endDateGroup" style="display: none;">
+                    <label for="taskEndDate">End Date</label>
+                    <input type="date" id="taskEndDate">
+                </div>
+                <div class="form-group">
+                    <label for="taskTime">Start Time</label>
+                    <input type="time" id="taskTime">
+                </div>
+                <div class="form-group" id="endTimeGroup" style="display: none;">
+                    <label for="taskEndTime">End Time</label>
+                    <input type="time" id="taskEndTime">
+                </div>
+                </div>
+                <div class="ai-assist-block">
+                    <button type="button" id="aiEntryAssistBtn" class="btn btn-secondary subtle full">AI Suggest Details</button>
+                    <div id="aiEntrySuggestion" class="ai-assist-output" aria-live="polite"></div>
+                </div>
+                <div id="familyShareBlock" class="form-stack hidden">
+                    <div class="form-group toggle-row">
+                        <label for="shareWithFamily">Share with family</label>
+                        <label class="switch">
+                            <input type="checkbox" id="shareWithFamily">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="form-group hidden" id="familyAssigneeGroup">
+                        <label for="familyAssignees">Assign to family members</label>
+                        <select id="familyAssignees" multiple></select>
+                        <p class="form-hint">Choose who should receive this reminder. Leave empty to share with everyone.</p>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Entry</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- AI Theme Modal -->
+    <div id="aiThemeModal" class="modal">
+        <div class="modal-content wide">
+            <span class="close" id="closeAiThemeModal">&times;</span>
+            <h3>AI Theme Customizer</h3>
+            <p>Describe the vibe you want (e.g., "I like basketball" or "cozy vintage coffee shop") and AI will restyle the dashboard.</p>
+            <form id="aiThemeForm">
+                <div class="form-group">
+                    <label for="aiThemePrompt">Your Inspiration</label>
+                    <input type="text" id="aiThemePrompt" placeholder="Tell AI what you like" required>
+                </div>
+                <div class="ai-theme-preview" id="aiThemePreview"></div>
+                <div class="ai-theme-actions">
+                    <button type="submit" class="btn btn-primary">Generate Theme</button>
+                    <button type="button" id="applyAiTheme" class="btn btn-tertiary" disabled>Apply Theme</button>
+                    <button type="button" id="resetAiTheme" class="btn btn-secondary subtle">Reset to Default</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="theme.js"></script>
+    <script src="debug.js"></script>
+    <script src="demo-data.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>
+
+
+
+

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FamilyHub - Welcome</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-default">
+    <div class="container">
+        <div class="auth-container">
+            <div class="auth-box">
+                <h1 class="logo">FamilyHub</h1>
+                <p class="tagline">Your personal planning and study companion</p>
+                
+                <!-- Login Form -->
+                <div id="loginForm" class="form-container active">
+                    <h2>Login</h2>
+                    <form id="login">
+                        <div class="form-group">
+                            <label for="loginUsername">Username</label>
+                            <input type="text" id="loginUsername" required>
+                        </div>
+                        <div class="form-group password-group">
+                            <label for="loginPassword">Password</label>
+                            <div class="password-input-wrapper">
+                                <input type="password" id="loginPassword" required>
+                                <button type="button" class="toggle-password" data-target="loginPassword" aria-label="Show password">
+                                    <span class="eye-icon" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="rememberMe" style="width: auto; margin: 0;">
+                            <label for="rememberMe" style="margin: 0; font-weight: normal; cursor: pointer;">Remember me</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </form>
+                    <p class="switch-form">Don't have an account? <a href="#" id="showSignup">Sign up</a></p>
+                </div>
+
+                <!-- Signup Form -->
+                <div id="signupForm" class="form-container">
+                    <h2>Sign Up</h2>
+                    <form id="signup">
+                        <div class="form-group">
+                            <label for="signupUsername">Username</label>
+                            <input type="text" id="signupUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="signupEmail">Email</label>
+                            <input type="email" id="signupEmail" required>
+                        </div>
+                        <div class="form-group password-group">
+                            <label for="signupPassword">Password</label>
+                            <div class="password-input-wrapper">
+                                <input type="password" id="signupPassword" required minlength="6">
+                                <button type="button" class="toggle-password" data-target="signupPassword" aria-label="Show password">
+                                    <span class="eye-icon" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Verification Code</button>
+                    </form>
+                    <p class="switch-form">Already have an account? <a href="#" id="showLogin">Login</a></p>
+                </div>
+
+                <!-- Verification Form -->
+                <div id="verificationForm" class="form-container">
+                    <h2>Verify Your Email</h2>
+                    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">
+                        We've sent a 6-digit verification code to <strong id="verificationEmail"></strong>
+                    </p>
+                    <form id="verification">
+                        <div class="form-group">
+                            <label for="verificationCode">Verification Code</label>
+                            <input type="text" id="verificationCode" maxlength="6" pattern="[0-9]{6}" required 
+                                   placeholder="Enter 6-digit code" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem;">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Verify Email</button>
+                        <button type="button" id="resendCode" class="btn btn-secondary" style="margin-top: 10px;">Resend Code</button>
+                    </form>
+                    <p class="switch-form">Wrong email? <a href="#" id="backToSignup">Go back</a></p>
+                </div>
+
+                <div id="errorMessage" class="error-message"></div>
+                <div id="successMessage" class="success-message"></div>
+            </div>
+        </div>
+    </div>
+    <script src="theme.js"></script>
+    <script src="debug.js"></script>
+    <script src="demo-data.js"></script>
+    <script src="auth.js"></script>
+</body>
+</html>
+
+
+
